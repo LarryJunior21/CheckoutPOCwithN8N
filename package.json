@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fullstory/browser": "^2.0.6",
     "@hotjar/browser": "^1.0.9",
     "framer-motion": "^12.34.3",
     "next": "16.1.6",
