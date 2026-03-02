@@ -70,13 +70,14 @@ export default function CartCheckoutPage(): JSX.Element {
 
   // ---- FullStory Init ----
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      init({
-        orgId: process.env.NEXT_PUBLIC_FULLSTORY_ORGID || 'YOUR_ORG_ID'
-      })
-      // OPTIONAL: send first page view custom event
-      FullStory('trackEvent', { name: 'page_view', properties: { page: window.location.pathname } })
+    const orgId = process.env.NEXT_PUBLIC_FULLSTORY_ORGID
+    if (!orgId) {
+      console.warn('FullStory: NEXT_PUBLIC_FULLSTORY_ORGID is not set — skipping initialization.')
+      return
     }
+    init({ orgId })
+    console.log('[v0] FullStory initialized with orgId:', orgId)
+    FullStory('trackEvent', { name: 'page_view', properties: { page: window.location.pathname } })
   }, [])
 
   // ---- GA4 Init ----
