@@ -15,7 +15,7 @@ const PRODUCT: Product = {
   id: 'sku-001',
   name: 'POC Sneakers',
   price: 120
-}
+};
 
 // -----------------
 // Helper components
@@ -64,9 +64,9 @@ const Button = ({ children, onClick, color }: { children: React.ReactNode, onCli
 // Main Page
 // -----------------
 export default function CartCheckoutPage(): JSX.Element {
-  const [step, setStep] = useState<'cart' | 'checkout' | 'confirmation'>('cart')
-  const [postcode, setPostcode] = useState<string>('')
-  const [error, setError] = useState<string | null>(null)
+  const [step, setStep] = useState<'cart' | 'checkout' | 'confirmation'>('cart');
+  const [postcode, setPostcode] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   // ---- FullStory Init ----
   useEffect(() => {
