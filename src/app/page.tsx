@@ -15,7 +15,7 @@ const PRODUCT: Product = {
   id: 'sku-001',
   name: 'POC Sneakers',
   price: 120
-}
+};
 
 // -----------------
 // Helper components
