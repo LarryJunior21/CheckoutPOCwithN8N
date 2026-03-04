@@ -65,9 +65,9 @@ Open your browser and go to: **http://localhost:5678**
 
 ## Step 10: Configure Ollama in n8n
 1. In n8n, add an Ollama node
-2. Set Base URL to: `http://ollama:11434`
+2. Set Base URL to: `http://ollama:11434` or if using docker `http://host.docker.internal:11434`
 3. Leave API Key blank (Ollama doesn't use one)
-4. Select model: `smollm2`
+4. Select model: `smollm2` or any other
 
 ## Useful Commands
 
