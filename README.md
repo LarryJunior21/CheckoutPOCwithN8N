@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Docker + n8n + Ollama Setup Guide for Mac
 
-## Getting Started
-
-First, run the development server:
-
+## Step 1: Install Homebrew (if not already installed)
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Step 2: Install Docker CLI
+```bash
+brew install docker
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Step 3: Install OrbStack (Docker daemon for Mac)
+```bash
+brew install orbstack
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Start OrbStack from Applications or:
+```bash
+open /Applications/OrbStack.app
+```
 
-## Learn More
+Wait for the OrbStack icon to appear in the menu bar.
 
-To learn more about Next.js, take a look at the following resources:
+## Step 4: Verify Docker is working
+```bash
+docker ps
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+You should see an empty list (no containers yet).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Step 5: Create n8n data volume
+```bash
+docker volume create n8n_data
+```
 
-## Deploy on Vercel
+## Step 6: Start n8n container
+```bash
+docker run -d \
+ --name n8n \
+ -p 5678:5678 \
+ -e GENERIC_TIMEZONE="AEST" \
+ -e TZ="AEST" \
+ -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
+ -e N8N_RUNNERS_ENABLED=true \
+ -v n8n_data:/home/node/.n8n \
+ docker.n8n.io/n8nio/n8n \
+ start --tunnel
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Step 7: Start Ollama container
+```bash
+docker run -d --name ollama -p 11434:11434 ollama/ollama:latest
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Step 8: Pull smollm2 model (first time only)
+```bash
+docker exec ollama ollama pull smollm2
+```
+
+This takes a few minutes depending on your internet speed.
+
+## Step 9: Access n8n
+Open your browser and go to: **http://localhost:5678**
+
+## Step 10: Configure Ollama in n8n
+1. In n8n, add an Ollama node
+2. Set Base URL to: `http://ollama:11434`
+3. Leave API Key blank (Ollama doesn't use one)
+4. Select model: `smollm2`
+
+## Useful Commands
+
+**Check running containers:**
+```bash
+docker ps
+```
+
+**View container logs:**
+```bash
+docker logs n8n
+docker logs ollama
+```
+
+**Stop containers:**
+```bash
+docker stop n8n ollama
+```
+
+**Start containers:**
+```bash
+docker start n8n ollama
+```
+
+**Delete a container (volume persists):**
+```bash
+docker rm n8n
+```
+
+**List volumes:**
+```bash
+docker volume ls
+```
+
+**Delete a volume (WARNING: data is lost):**
+```bash
+docker volume rm n8n_data
+```
+
+## Expose n8n with pinggy
+
+To access n8n from outside your Mac:
+
+```bash
+ssh -p 443 -R0:localhost:5678 a.pinggy.io
+```
+
+This gives you a public URL. Configure n8n with:
+
+```bash
+docker stop n8n
+docker run -d \
+ --name n8n \
+ -p 5678:5678 \
+ -e GENERIC_TIMEZONE="AEST" \
+ -e TZ="AEST" \
+ -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
+ -e N8N_RUNNERS_ENABLED=true \
+ -e WEBHOOK_URL=https://your-pinggy-url.a.pinggy.io \
+ -v n8n_data:/home/node/.n8n \
+ docker.n8n.io/n8nio/n8n \
+ start --tunnel
+```
+
+Replace `your-pinggy-url` with your actual pinggy URL.
+
+## Migrate from Windows WSL backup
+
+If you have an `n8n_data.tar.gz` backup from Windows:
+
+```bash
+docker volume create n8n_data
+docker run --rm -v n8n_data:/data -v ~/Desktop:/backup alpine tar xzf /backup/n8n_data.tar.gz -C /data
+```
+
+Then start the containers as above. Your workflows will be restored.
+
+## Done!
+
+You now have:
+- ✅ Docker CLI + OrbStack
+- ✅ n8n workflow automation
+- ✅ Ollama LLM with smollm2
+- ✅ Persistent data volumes
+
+All running in isolated containers on your Mac.
