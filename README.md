@@ -1,4 +1,4 @@
-# AI Analytics Automation using N8N
+# AI Analytics Automation using N8N + RAG to increase AI reasoning
 
 A proof-of-concept that connects front-end user behaviour data to an AI-powered automation pipeline, automatically analysing checkout performance and suggesting (or applying) code improvements with human approval.
 
