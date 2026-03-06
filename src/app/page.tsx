@@ -21,39 +21,33 @@ const PRODUCT: Product = {
 // Helper components
 // -----------------
 const StepIndicator = ({ step }: { step: 'cart' | 'checkout' | 'confirmation' }): JSX.Element => (
-  <div style={{ marginBottom: 24, fontSize: 14, color: '#555', fontWeight: 500 }}>
+  <div 
+    className="step-indicator" 
+    role="status" 
+    aria-live="polite"
+    aria-label={`Step ${step === 'cart' ? '1' : step === 'checkout' ? '2' : '3'}: ${step === 'cart' ? 'Cart' : step === 'checkout' ? 'Checkout' : 'Confirmation'}`}
+  >
     Step: {step === 'cart' ? '1/3 - Cart' : step === 'checkout' ? '2/3 - Checkout' : '3/3 - Confirmation'}
   </div>
 )
 
 const AnimatedSection = ({ children }: { children: React.ReactNode }): JSX.Element => (
-  <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} style={{ marginBottom: 32 }}>
+  <motion.section 
+    initial={{ opacity: 0, y: 10 }} 
+    animate={{ opacity: 1, y: 0 }} 
+    transition={{ duration: 0.3 }} 
+    className="animated-section"
+  >
     {children}
   </motion.section>
 )
 
 const Button = ({ children, onClick, color }: { children: React.ReactNode, onClick: () => void, color: 'primary' | 'success' }): JSX.Element => {
-  const styles = {
-    primary: { backgroundColor: '#0070f3', hover: '#005bb5' },
-    success: { backgroundColor: '#28a745', hover: '#1e7e34' }
-  }
   return (
     <button
       onClick={onClick}
-      style={{
-        padding: '12px 24px',
-        color: 'white',
-        border: 'none',
-        borderRadius: 6,
-        cursor: 'pointer',
-        backgroundColor: styles[color].backgroundColor,
-        fontWeight: 500,
-        fontSize: 16,
-        transition: 'background-color 0.2s',
-        width: '100%'
-      }}
-      onMouseEnter={e => (e.currentTarget.style.backgroundColor = styles[color].hover)}
-      onMouseLeave={e => (e.currentTarget.style.backgroundColor = styles[color].backgroundColor)}
+      className={`button button-${color}`}
+      aria-label={typeof children === 'string' ? children : 'Button'}
     >
       {children}
     </button>
@@ -115,16 +109,16 @@ export default function CartCheckoutPage(): JSX.Element {
   }
 
   return (
-    <main style={{ maxWidth: 480, margin: '40px auto', fontFamily: 'system-ui, sans-serif', padding: '0 16px' }}>
-      <h1 style={{ fontSize: 28, marginBottom: 16 }}>Commerce POC</h1>
+    <main className="main-container">
+      <h1 className="page-title">Commerce POC</h1>
       <StepIndicator step={step} />
 
       {step === 'cart' && (
         <AnimatedSection>
-          <h2 style={{ fontSize: 22, marginBottom: 8 }}>Your Cart</h2>
-          <div style={{ padding: 16, border: '1px solid #ddd', borderRadius: 8, marginBottom: 16 }}>
-            <p style={{ fontSize: 16 }}>{PRODUCT.name}</p>
-            <p style={{ fontSize: 16, fontWeight: 600 }}>¥{PRODUCT.price}</p>
+          <h2 className="section-title">Your Cart</h2>
+          <div className="product-card">
+            <p>{PRODUCT.name}</p>
+            <p className="product-price">¥{PRODUCT.price}</p>
           </div>
           <Button onClick={proceedToCheckout} color="primary">Continue to Checkout</Button>
         </AnimatedSection>
@@ -132,25 +126,20 @@ export default function CartCheckoutPage(): JSX.Element {
 
       {step === 'checkout' && (
         <AnimatedSection>
-          <h2 style={{ fontSize: 22, marginBottom: 8 }}>Checkout</h2>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Postcode (JP)</label>
+          <h2 className="section-title">Checkout</h2>
+          <div className="form-group">
+            <label htmlFor="postcode" className="form-label">Postcode (JP)</label>
             <input
+              id="postcode"
               type='text'
               value={postcode}
               onChange={handlePostcodeChange}
               placeholder='7-digit postcode'
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: 12,
-                fontSize: 16,
-                borderRadius: 6,
-                border: error ? '1px solid red' : '1px solid #ccc',
-                outline: 'none'
-              }}
+              className={`form-input ${error ? 'error' : ''}`}
+              aria-invalid={!!error}
+              aria-describedby={error ? 'postcode-error' : undefined}
             />
-            {error && <p style={{ color: 'red', fontSize: 14, marginTop: 4 }}>{error}</p>}
+            {error && <p id="postcode-error" className="error-message" role="alert">{error}</p>}
           </div>
           <Button onClick={validateAndPay} color="success">Pay ¥{PRODUCT.price}</Button>
         </AnimatedSection>
@@ -158,11 +147,116 @@ export default function CartCheckoutPage(): JSX.Element {
 
       {step === 'confirmation' && (
         <AnimatedSection>
-          <h2 style={{ fontSize: 22, marginBottom: 8 }}>Order Confirmed</h2>
-          <p style={{ fontSize: 16, marginBottom: 8 }}>Thank you for your purchase.</p>
-          <p style={{ fontSize: 14, color: '#555' }}>Refresh the page to restart the flow.</p>
+          <h2 className="section-title">Order Confirmed</h2>
+          <p>Thank you for your purchase.</p>
+          <p className="secondary-text">Refresh the page to restart the flow.</p>
         </AnimatedSection>
       )}
+
+      <style jsx>{`
+        .main-container {
+          max-width: 480px;
+          margin: 40px auto;
+          font-family: system-ui, sans-serif;
+          padding: 0 16px;
+        }
+        
+        .page-title {
+          font-size: 28px;
+          margin-bottom: 16px;
+        }
+        
+        .step-indicator {
+          margin-bottom: 24px;
+          font-size: 14px;
+          color: #555;
+          font-weight: 500;
+        }
+        
+        .animated-section {
+          margin-bottom: 32px;
+        }
+        
+        .section-title {
+          font-size: 22px;
+          margin-bottom: 8px;
+        }
+        
+        .product-card {
+          padding: 16px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+        
+        .product-price {
+          font-size: 16px;
+          font-weight: 600;
+        }
+        
+        .button {
+          padding: 12px 24px;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          font-size: 16px;
+          transition: background-color 0.2s;
+          width: 100%;
+        }
+        
+        .button-primary {
+          background-color: #0070f3;
+        }
+        
+        .button-primary:hover {
+          background-color: #005bb5;
+        }
+        
+        .button-success {
+          background-color: #28a745;
+        }
+        
+        .button-success:hover {
+          background-color: #1e7e34;
+        }
+        
+        .form-group {
+          margin-bottom: 16px;
+        }
+        
+        .form-label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 500;
+        }
+        
+        .form-input {
+          display: block;
+          width: 100%;
+          padding: 12px;
+          font-size: 16px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
+          outline: none;
+        }
+        
+        .form-input.error {
+          border-color: red;
+        }
+        
+        .error-message {
+          color: red;
+          font-size: 14px;
+          margin-top: 4px;
+        }
+        
+        .secondary-text {
+          font-size: 14px;
+          color: #555;
+        }
+      `}</style>
     </main>
   )
 }
